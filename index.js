@@ -2,53 +2,73 @@
 
 var eqURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
-// Create a map object
-var myMap = L.map("map", {
-    center: [37.09, -95.71],
-    zoom: 5
+// Perform a GET request to the query URL
+d3.json(eqURL, function(data) {
+    // Once we get a response, send the data.features object to the createFeatures function
+    createFeatures(data.features);
   });
   
-  // Add a tile layer
-  L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-    maxZoom: 18,
-    id: "mapbox.streets",
-    accessToken: API_Key
-  }).addTo(myMap);
+  function createFeatures(earthquakeData) {
   
-  // An array containing each city's name, location, and population
-  var cities = [{
-    location: [40.7128, -74.0059],
-    name: "New York",
-    population: "8,550,405"
-  },
-  {
-    location: [41.8781, -87.6298],
-    name: "Chicago",
-    population: "2,720,546"
-  },
-  {
-    location: [29.7604, -95.3698],
-    name: "Houston",
-    population: "2,296,224"
-  },
-  {
-    location: [34.0522, -118.2437],
-    name: "Los Angeles",
-    population: "3,971,883"
-  },
-  {
-    location: [41.2524, -95.9980],
-    name: "Omaha",
-    population: "446,599"
+    // Define a function we want to run once for each feature in the features array
+    // Give each feature a popup describing the place and time of the earthquake
+    function onEachFeature(feature, layer) {
+      layer.bindPopup("<h3>" + feature.properties.place +
+        "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+    }
+  
+    // Create a GeoJSON layer containing the features array on the earthquakeData object
+    // Run the onEachFeature function once for each piece of data in the array
+    var earthquakes = L.geoJSON(earthquakeData, {
+      onEachFeature: onEachFeature
+    });
+  
+    // Sending our earthquakes layer to the createMap function
+    createMap(earthquakes);
   }
-  ];
   
-  // Loop through the cities array and create one marker for each city, bind a popup containing its name and population add it to the map
-  for (var i = 0; i < cities.length; i++) {
-    var city = cities[i];
-    L.marker(city.location)
-      .bindPopup("<h1>" + city.name + "</h1> <hr> <h3>Population " + city.population + "</h3>")
-      .addTo(myMap);
+  function createMap(earthquakes) {
+  
+    // Define satmap and darkmap layers
+    var satmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+      attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+      maxZoom: 18,
+      id: "mapbox.satellite",
+      accessToken: API_Key
+    });
+  
+    var darkmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+      attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+      maxZoom: 18,
+      id: "mapbox.dark",
+      accessToken: API_Key
+    });
+  
+    // Define a baseMaps object to hold our base layers
+    var baseMaps = {
+      "Satilite Map": satmap,
+      "Dark Map": darkmap
+    };
+  
+    // Create overlay object to hold our overlay layer
+    var overlayMaps = {
+      Earthquakes: earthquakes
+    };
+  
+    // Create our map, giving it the satmap and earthquakes layers to display on load
+    var myMap = L.map("map", {
+      center: [
+        37.09, -95.71
+      ],
+      zoom: 5,
+      layers: [satmap, earthquakes]
+    });
+  
+    // Create a layer control
+    // Pass in our baseMaps and overlayMaps
+    // Add the layer control to the map
+    L.control.layers(baseMaps, overlayMaps, {
+      collapsed: false
+    }).addTo(myMap);
   }
   
