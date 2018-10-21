@@ -2,6 +2,10 @@
 
 var eqURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
+// URL for tectonic plates
+
+var tectonicPlatesURL = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json"
+
 // Perform a GET request to the query URL
 d3.json(eqURL, function(data) {
     // Once we get a response, send the data.features object to the createFeatures function
@@ -78,10 +82,24 @@ d3.json(eqURL, function(data) {
       "Dark Map": darkmap,
       "Terrain Map": terrainmap
     };
+
+    // Add a layer for tectonic plates
+    var tectonicLayer = new L.LayerGroup();
+
+    // Add Fault lines data
+    d3.json(tectonicPlatesURL, function(plateData) {
+    // Adding our geoJSON data and color to the tectonicplates layer
+    L.geoJson(plateData, {
+      color: "aqua",
+      weight: 3
+    })
+    .addTo(tectonicLayer);
+    });
   
     // Create overlay object to hold our overlay layer
     var overlayMaps = {
-      Earthquakes: earthquakes
+      Earthquakes: earthquakes,
+      "Tectonic Plates": tectonicLayer
     };
   
     // Create our map, giving it the satmap and earthquakes layers to display on load
@@ -90,7 +108,7 @@ d3.json(eqURL, function(data) {
         37.09, -95.71
       ],
       zoom: 5,
-      layers: [satmap, terrainmap, earthquakes]
+      layers: [satmap, terrainmap, earthquakes, tectonicLayer]
     });
   
     // Create a layer control
