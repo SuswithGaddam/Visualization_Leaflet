@@ -99,7 +99,7 @@ d3.json(eqURL, function(data) {
     // Create overlay object to hold our overlay layer
     var overlayMaps = {
       Earthquakes: earthquakes,
-      "Tectonic Plates": tectonicLayer
+      "Fault Lines": tectonicLayer
     };
   
     // Create our map, giving it the satmap and earthquakes layers to display on load
