@@ -36,6 +36,16 @@ d3.json(eqURL, function(data) {
     // Sending our earthquakes layer to the createMap function
     createMap(earthquakes);
   }
+
+    //Create color range for the circle diameter 
+    function getColor(d){
+      return d > 5 ? '#1a0d00':
+      d  > 4 ? '#4d2600':
+      d > 3 ? '#b35900':
+      d > 2 ? '#e67300':
+      d > 1 ? '#ffa64d':
+              '#ffcc99';
+    };
   
   function createMap(earthquakes) {
   
@@ -92,16 +102,19 @@ d3.json(eqURL, function(data) {
 
     //Create a legend on the bottom right
     var legend = L.control({position: 'bottomright'});
-    legend.onAdd = function(myMap){
-        var div = L.DomUtil.create('div', 'info legend'),
-        grades = [0, 1, 2, 3, 4, 5],
-        labels = [];
 
-    // loop through our density intervals and generate a label with a colored square for each interval
-        for (var i = 0; i < grades.length; i++) {
-            div.innerHTML +=
-                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    legend.onAdd = function(map) {
+  
+      var div = L.DomUtil.create('div','info legend'),
+          grades = [0,1,2,3,4,5],
+          labels = [];
+  
+      div.innerHTML += "<h4 style='margin:4px'>Magnitude</h4>" 
+      // loop through our density intervals and generate a label for each interval
+      for (var i=0; i < grades.length; i++){
+        div.innerHTML +=
+        '<i style="background:'+getColor(grades[i]+1)+'">&nbsp;&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;' +
+          grades[i] + (grades[i+1]?'&ndash;' + grades[i+1] +'<br>': '+');
         }
         return div;
     };
@@ -109,17 +122,6 @@ d3.json(eqURL, function(data) {
     legend.addTo(myMap);
     }
     
-
-    //Create color range for the circle diameter 
-    function getColor(d){
-        return d > 5 ? "#1a0d00":
-        d  > 4 ? "#4d2600":
-        d > 3 ? "#b35900":
-        d > 2 ? "#e67300":
-        d > 1 ? "#ffa64d":
-                "#ffcc99";
-    }
-
     //Change the maginutde of the earthquake by a factor of 30,000 for the radius of the circle. 
     function getRadius(value){
         return value*30000
