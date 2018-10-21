@@ -5,4 +5,4 @@ Create a map using Leaflet that plots all of the earthquakes from your data set 
 * Popups provide additional information about the earthquake when a marker is clicked.
 * The legend provides context for the map data.
 * Here's the final output:
-![Screenshot](EarthQuake_Leaflet.png)
+![Screenshot](EQ_TP.png)
